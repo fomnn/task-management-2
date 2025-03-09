@@ -1,0 +1,4 @@
+localhost
+
+root * ./apps/client/www/mysite
+file_server
