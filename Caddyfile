@@ -1,4 +1,4 @@
 localhost
 
-root * ./apps/client/www/mysite
+root * ./apps/client/dist
 file_server
