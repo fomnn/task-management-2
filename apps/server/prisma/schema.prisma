@@ -1,0 +1,123 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+  output = "../../node_modules/.prisma/client"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model users {
+  id       String @id @default(uuid())
+  email    String @unique
+  password String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  profile          profiles?
+  workspaceMembers workspaceMembers[]
+  projectRoleUsers projectRoleUsers[]
+  tasks            tasks[]
+}
+
+model profiles {
+  id     String @id @default(uuid())
+  userId String @unique
+
+  fullname String
+  username String?
+
+  user users @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+}
+
+model workspaces {
+  id String @id @default(uuid())
+
+  name      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  members  workspaceMembers[]
+  projects projects[]
+}
+
+model workspaceMembers {
+  id          Int        @id @default(autoincrement())
+  workspaceId String
+  userId      String
+  memberRole  memberRole
+  workspace   workspaces @relation(fields: [workspaceId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  user        users      @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+}
+
+model projects {
+  id          String @id @default(uuid())
+  workspaceId String
+  name        String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  workspace    workspaces     @relation(fields: [workspaceId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  projectRoles projectRoles[]
+  tasks        tasks[]
+}
+
+model projectRoles {
+  id        String @id @default(uuid())
+  role      String
+  projectId String
+
+  project          projects           @relation(fields: [projectId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  projectRoleUsers projectRoleUsers[]
+}
+
+model projectRoleUsers {
+  id            String @id @default(uuid())
+  projectRoleId String
+  userId        String
+
+  projectRole projectRoles @relation(fields: [projectRoleId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  user        users        @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+}
+
+model tasks {
+  id        String @id @default(uuid())
+  projectId String
+
+  name     String
+  desc     String?
+  status   taskStatus
+  category taskCategory
+  memberId String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  project projects @relation(fields: [projectId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  member  users?   @relation(fields: [memberId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+enum taskCategory {
+  design
+  research
+  content
+  development
+}
+
+enum taskStatus {
+  todo
+  inProgress
+  review
+  done
+}
+
+enum memberRole {
+  admin
+  member
+}
