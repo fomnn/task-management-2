@@ -1,7 +1,7 @@
 import { serve } from '@hono/node-server';
 import { Hono } from 'hono';
 import authApi from "./routes/auth.js";
-import { prisma } from "./lib/prisma.js";
+import prisma from "./lib/prisma.js";
 
 const app = new Hono();
 
